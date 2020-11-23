@@ -1,8 +1,8 @@
 # Manifest
 
-- Native:
+- K8s native:
 ```
-kubectl apply -f k apply -f manifests
+kubectl apply -f manifests
 ```
 
 - Helm 3
@@ -62,8 +62,9 @@ Istio Multi-cloud Service Mesh supports virtual machines
 Reference:
 https://istio.io/latest/docs/examples/virtual-machines/single-network/#send-requests-from-virtual-machine-workloads-to-kubernetes-services
 
-## Extra: Connectivity on application level.
-	Let’s assume we have a legacy application running on EC2 instances and decided to migrate it to EKS. In this case leveraging AWS EventBridge + SQS might be helpful as an interim solution if it’s not possible to use the “lift and shift” strategy. So, Legacy application will be sending events to EventBridge  with routing to SQS queue. Simple SQS consumer client (AWS SDK) will be deployed in EKS.
+## Option 6: Connectivity on application level
+
+Let's assume we have a legacy application running on EC2 instances and decided to migrate it to EKS. In this case leveraging AWS EventBridge + SQS might be helpful as an interim solution if it’s not possible to use the “lift and shift” strategy. So, Legacy application will be sending events to EventBridge  with routing to SQS queue. Simple SQS consumer client (AWS SDK) will be deployed in EKS.
 
 # Database
 
