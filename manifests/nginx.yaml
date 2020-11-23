@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ labels:
+   app: nginx
+ name: nginx
+ namespace: default
+spec:
+ replicas: 1
+ revisionHistoryLimit: 10
+ selector:
+   matchLabels:
+     app: nginx
+ strategy:
+   rollingUpdate:
+     maxSurge: 25%
+     maxUnavailable: 25%
+   type: RollingUpdate
+ template:
+   metadata:
+     labels:
+       app: nginx
+   spec:
+     containers:
+     - image: nginx
+       imagePullPolicy: Always
+       name: nginx
+       resources: {}
+       resources:
+         requests:
+           cpu: 50m
+           memory: 50Mi
+         limits:
+           cpu: 100m
+           memory: 100Mi
+       livenessProbe:
+        httpGet:
+          path: /
+          port: 80
+        initialDelaySeconds: 5
+        periodSeconds: 5
+       readinessProbe:
+        httpGet:
+          path: /
+          port: 80
+        initialDelaySeconds: 5
+        periodSeconds: 5
+       volumeMounts:
+       - name: nginx-config
+         mountPath: /etc/nginx/nginx.conf
+         subPath: nginx.conf
+     securityContext: {}
+     nodeSelector:
+       app: nginx
+     volumes:
+     - name: nginx-config
+       configMap:
+         name: nginx-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+ creationTimestamp: null
+ labels:
+   app: nginx
+ name: nginx
+spec:
+ ports:
+ - port: 8000
+   protocol: TCP
+   targetPort: 80
+ selector:
+   app: nginx
+status:
+ loadBalancer: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ name: nginx-config
+ namespace: default
+data:
+ nginx.conf: |2
+   user  nginx;
+   worker_processes  1;
+   error_log  /var/log/nginx/error.log warn;
+   pid        /var/run/nginx.pid;
+   events {
+       worker_connections  1024;
+   }
+   http {
+       include       /etc/nginx/mime.types;
+       default_type  application/octet-stream;
+       log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                         '$status $body_bytes_sent "$http_referer" '
+                         '"$http_user_agent" "$http_x_forwarded_for"';
+       access_log  /var/log/nginx/access.log  main;
+       sendfile        on;
+       #tcp_nopush     on;
+       keepalive_timeout  65;
+       #gzip  on;
+       include /etc/nginx/conf.d/*.conf;
+   }
